@@ -57,7 +57,7 @@
           'bg-green-300': currentPage == page,
           'bg-gray-200': currentPage != page
         }"
-        @click="onClickPage(page * 10)"
+        @click="onClickPage((page - 1) * 10)"
       >
         {{ page }}
       </li>
@@ -96,7 +96,7 @@ export default {
       this.currentSkip -= 10;
     },
     onClickPage(page) {
-      this.currentSkip = page + 10;
+      this.currentSkip = page;
     },
     onClickNextPage() {
       this.currentSkip += 10;
@@ -106,6 +106,7 @@ export default {
     },
     async updateData() {
       if ((this.currentSkip < 0) | (this.currentSkip >= this.lastPage)) return;
+      this.currentPage = this.currentSkip + 1;
       try {
         this.loading = true;
         const request = await axios.get(
@@ -113,11 +114,6 @@ export default {
         );
         const response = await request.data;
         this.data = response.users;
-        this.displayArray = [
-          this.changeToNumber(this.currentSkip) + 1,
-          this.changeToNumber(this.currentSkip) + 2,
-          this.changeToNumber(this.currentSkip) + 3
-        ];
       } catch (error) {
         console.log(error);
       } finally {
@@ -135,6 +131,17 @@ export default {
     currentSkip() {
       this.updateData();
       this.currentPage = this.changeToNumber(this.currentSkip) + 1;
+      if (this.currentPage === this.lastPage) {
+        this.displayArray = [7, 8, 9];
+      }
+      if (this.currentPage > 1 && this.currentSkip < this.lastPage) {
+        this.displayArray = [
+          this.currentPage - 1,
+          this.currentPage,
+          this.currentPage + 1
+        ];
+        return;
+      }
     }
   },
   data() {
@@ -144,7 +151,7 @@ export default {
       currentSkip: 0,
       loading: false,
       lastPage: 90,
-      displayArray: []
+      displayArray: [1, 2, 3]
     };
   }
 };
