@@ -5,37 +5,25 @@
         <h1
           class="flex items-center justify-center w-1/2 py-3 text-white font-semibold text-lg bg-green-400"
         >
-          Name
+          First Name
         </h1>
         <h1
           class="flex items-center justify-center w-1/2 py-3 text-white font-semibold text-lg bg-green-400"
         >
-          Power
+          Age
         </h1>
       </div>
-      <div class="w-full py-2 flex flex-col gap-2">
+      <div
+        class="w-full py-2 flex flex-col gap-2"
+        v-for="user in data"
+        :key="user.id"
+      >
         <div class="w-full flex justify-between gap-2">
           <h1 class="flex items-center justify-center w-1/2 py-3 bg-gray-100">
-            Chuck Norris
+            {{ user.firstName }}
           </h1>
           <h1 class="flex items-center justify-center w-1/2 py-3 bg-gray-100">
-            Infinity
-          </h1>
-        </div>
-        <div class="w-full flex justify-between gap-2">
-          <h1 class="flex items-center justify-center w-1/2 py-3 bg-gray-100">
-            Chuck Norris
-          </h1>
-          <h1 class="flex items-center justify-center w-1/2 py-3 bg-gray-100">
-            Infinity
-          </h1>
-        </div>
-        <div class="w-full flex justify-between gap-2">
-          <h1 class="flex items-center justify-center w-1/2 py-3 bg-gray-100">
-            Chuck Norris
-          </h1>
-          <h1 class="flex items-center justify-center w-1/2 py-3 bg-gray-100">
-            Infinity
+            {{ user.age }}
           </h1>
         </div>
       </div>
@@ -48,6 +36,19 @@
           aria-label="Go to first page"
         >
           First
+        </button>
+      </li>
+      <li
+        class="p-2 px-4 rounded-md cursor-pointer"
+        v-for="num in changeButtons"
+        :key="num"
+        :class="{
+          'bg-green-300': currentPageIndex == num,
+          'bg-gray-200': currentPageIndex != num
+        }"
+      >
+        <button type="button">
+          {{ num }}
         </button>
       </li>
       <li class="bg-gray-200 p-2 px-4 rounded-md">
@@ -82,9 +83,10 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "HomeComponent",
-  props: {},
   computed: {
     startPage() {
       if (this.currentPage === 1) {
@@ -141,6 +143,26 @@ export default {
     isPageActive(page) {
       return this.currentPage === page;
     }
+  },
+  async mounted() {
+    try {
+      const request = await axios.get(
+        "https://dummyjson.com/users?limit=10&skip=10&select=firstName,age"
+      );
+      const response = await request.data;
+      this.data = response.users;
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  data() {
+    return {
+      data: [],
+      totalPages: 10,
+      currentPageIndex: 1,
+      maxVisibleButtons: 3,
+      changeButtons: [1, 2, 3]
+    };
   }
 };
 </script>
