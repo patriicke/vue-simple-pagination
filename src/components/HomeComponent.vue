@@ -5,6 +5,11 @@
         <h1
           class="flex items-center justify-center w-1/2 py-3 text-white font-semibold text-lg bg-green-400"
         >
+          ID
+        </h1>
+        <h1
+          class="flex items-center justify-center w-1/2 py-3 text-white font-semibold text-lg bg-green-400"
+        >
           First Name
         </h1>
         <h1
@@ -14,11 +19,20 @@
         </h1>
       </div>
       <div
+        v-if="loading"
+        class="flex items-center justify-center py-2 font-medium"
+      >
+        Loading...
+      </div>
+      <div
         class="w-full py-2 flex flex-col gap-2"
         v-for="user in data"
         :key="user.id"
       >
         <div class="w-full flex justify-between gap-2">
+          <h1 class="flex items-center justify-center w-1/2 py-3 bg-gray-100">
+            {{ user.id }}
+          </h1>
           <h1 class="flex items-center justify-center w-1/2 py-3 bg-gray-100">
             {{ user.firstName }}
           </h1>
@@ -29,54 +43,41 @@
       </div>
     </div>
     <ul class="flex gap-2 py-3 justify-end">
-      <li class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer">
-        <button
-          type="button"
-          @click="onClickFirstPage"
-          aria-label="Go to first page"
-        >
-          First
-        </button>
+      <li
+        class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer hover:bg-green-400 hover:text-white"
+        @click="onClickFirstPage"
+      >
+        First
       </li>
       <li
         class="p-2 px-4 rounded-md cursor-pointer"
-        v-for="num in changeButtons"
-        :key="num"
+        v-for="page in displayArray"
+        :key="page"
         :class="{
-          'bg-green-300': currentPageIndex == num,
-          'bg-gray-200': currentPageIndex != num
+          'bg-green-300': currentPage == page,
+          'bg-gray-200': currentPage != page
         }"
+        @click="onClickPage(page * 10)"
       >
-        <button type="button">
-          {{ num }}
-        </button>
+        {{ page }}
       </li>
-      <li class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer">
-        <button
-          type="button"
-          @click="onClickPreviousPage"
-          aria-label="Go to previous page"
-        >
-          Previous
-        </button>
+      <li
+        class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer hover:bg-green-400 hover:text-white"
+        @click="onClickPreviousPage"
+      >
+        Previous
       </li>
-      <li class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer">
-        <button
-          type="button"
-          @click="onClickNextPage"
-          aria-label="Go to next page"
-        >
-          Next
-        </button>
+      <li
+        class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer hover:bg-green-400 hover:text-white"
+        @click="onClickNextPage"
+      >
+        Next
       </li>
-      <li class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer">
-        <button
-          type="button"
-          @click="onClickLastPage"
-          aria-label="Go to last page"
-        >
-          Last
-        </button>
+      <li
+        class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer hover:bg-green-400 hover:text-white"
+        @click="onClickLastPage"
+      >
+        Last
       </li>
     </ul>
   </div>
@@ -87,82 +88,63 @@ import axios from "axios";
 
 export default {
   name: "HomeComponent",
-  computed: {
-    startPage() {
-      if (this.currentPage === 1) {
-        return 1;
-      }
-
-      if (this.currentPage === this.totalPages) {
-        return this.totalPages - this.maxVisibleButtons + 1;
-      }
-
-      return this.currentPage - 1;
-    },
-    endPage() {
-      return Math.min(
-        this.startPage + this.maxVisibleButtons - 1,
-        this.totalPages
-      );
-    },
-    pages() {
-      const range = [];
-
-      for (let i = this.startPage; i <= this.endPage; i += 1) {
-        range.push({
-          name: i,
-          isDisabled: i === this.currentPage
-        });
-      }
-
-      return range;
-    },
-    isInFirstPage() {
-      return this.currentPage === 1;
-    },
-    isInLastPage() {
-      return this.currentPage === this.totalPages;
-    }
-  },
   methods: {
     onClickFirstPage() {
-      this.$emit("pagechanged", 1);
+      this.currentSkip = 0;
     },
     onClickPreviousPage() {
-      this.$emit("pagechanged", this.currentPage - 1);
+      this.currentSkip -= 10;
     },
     onClickPage(page) {
-      this.$emit("pagechanged", page);
+      this.currentSkip = page + 10;
     },
     onClickNextPage() {
-      this.$emit("pagechanged", this.currentPage + 1);
+      this.currentSkip += 10;
     },
     onClickLastPage() {
-      this.$emit("pagechanged", this.totalPages);
+      this.currentSkip = this.lastPage;
     },
-    isPageActive(page) {
-      return this.currentPage === page;
+    async updateData() {
+      if ((this.currentSkip < 0) | (this.currentSkip >= this.lastPage)) return;
+      try {
+        this.loading = true;
+        const request = await axios.get(
+          `https://dummyjson.com/users?limit=10&skip=${this.currentSkip}&select=firstName,age`
+        );
+        const response = await request.data;
+        this.data = response.users;
+        this.displayArray = [
+          this.changeToNumber(this.currentSkip) + 1,
+          this.changeToNumber(this.currentSkip) + 2,
+          this.changeToNumber(this.currentSkip) + 3
+        ];
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+    changeToNumber(currentIndex) {
+      return Number(String(currentIndex).split("")[0]);
     }
   },
-  async mounted() {
-    try {
-      const request = await axios.get(
-        "https://dummyjson.com/users?limit=10&skip=10&select=firstName,age"
-      );
-      const response = await request.data;
-      this.data = response.users;
-    } catch (error) {
-      console.log(error);
+  mounted() {
+    this.updateData();
+  },
+  watch: {
+    currentSkip() {
+      this.updateData();
+      this.currentPage = this.changeToNumber(this.currentSkip) + 1;
     }
   },
   data() {
     return {
       data: [],
-      totalPages: 10,
-      currentPageIndex: 1,
-      maxVisibleButtons: 3,
-      changeButtons: [1, 2, 3],
-      maxPages: 10
+      currentPage: 1,
+      currentSkip: 0,
+      loading: false,
+      lastPage: 90,
+      displayArray: []
     };
   }
 };
