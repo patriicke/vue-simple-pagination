@@ -29,7 +29,7 @@
       </div>
     </div>
     <ul class="flex gap-2 py-3 justify-end">
-      <li class="bg-gray-200 p-2 px-4 rounded-md">
+      <li class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer">
         <button
           type="button"
           @click="onClickFirstPage"
@@ -51,7 +51,7 @@
           {{ num }}
         </button>
       </li>
-      <li class="bg-gray-200 p-2 px-4 rounded-md">
+      <li class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer">
         <button
           type="button"
           @click="onClickPreviousPage"
@@ -60,7 +60,7 @@
           Previous
         </button>
       </li>
-      <li class="bg-gray-200 p-2 px-4 rounded-md">
+      <li class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer">
         <button
           type="button"
           @click="onClickNextPage"
@@ -69,7 +69,7 @@
           Next
         </button>
       </li>
-      <li class="bg-gray-200 p-2 px-4 rounded-md">
+      <li class="bg-gray-200 p-2 px-4 rounded-md cursor-pointer">
         <button
           type="button"
           @click="onClickLastPage"
@@ -161,7 +161,8 @@ export default {
       totalPages: 10,
       currentPageIndex: 1,
       maxVisibleButtons: 3,
-      changeButtons: [1, 2, 3]
+      changeButtons: [1, 2, 3],
+      maxPages: 10
     };
   }
 };
