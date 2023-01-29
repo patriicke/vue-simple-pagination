@@ -93,19 +93,20 @@ export default {
       this.currentSkip = 0;
     },
     onClickPreviousPage() {
+      if (this.currentSkip == 0) return;
       this.currentSkip -= 10;
     },
     onClickPage(page) {
       this.currentSkip = page;
     },
     onClickNextPage() {
+      if (this.currentSkip == this.lastPage) return;
       this.currentSkip += 10;
     },
     onClickLastPage() {
       this.currentSkip = this.lastPage;
     },
     async updateData() {
-      if ((this.currentSkip < 0) | (this.currentSkip >= this.lastPage)) return;
       this.currentPage = this.currentSkip + 1;
       try {
         this.loading = true;
@@ -131,8 +132,12 @@ export default {
     currentSkip() {
       this.updateData();
       this.currentPage = this.changeToNumber(this.currentSkip) + 1;
-      if (this.currentPage === this.lastPage) {
-        this.displayArray = [7, 8, 9];
+      if (this.currentPage === 1) {
+        this.displayArray = [1, 2, 3];
+        return;
+      }
+      if (this.currentSkip >= this.lastPage) {
+        this.displayArray = [8, 9, 10];
       }
       if (this.currentPage > 1 && this.currentSkip < this.lastPage) {
         this.displayArray = [
@@ -140,7 +145,6 @@ export default {
           this.currentPage,
           this.currentPage + 1
         ];
-        return;
       }
     }
   },
